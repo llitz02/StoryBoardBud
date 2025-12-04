@@ -11,6 +11,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post" action="@Url.Action("Create")">
+                        @Html.AntiForgeryToken()
                         <div class="mb-3">
                             <label for="title" class="form-label">Board Title</label>
                             <input type="text" class="form-control" id="title" name="title" required 

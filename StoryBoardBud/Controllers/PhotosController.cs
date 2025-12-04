@@ -27,6 +27,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpPost("upload")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Upload(IFormFile file, bool isPrivate = false)
     {
         if (file == null || file.Length == 0)
@@ -61,6 +62,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpPost("add-to-board")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AddToBoard(Guid boardId, Guid photoId, double posX, double posY, double width = 200, double height = 200)
     {
         var board = await _context.Boards.FirstOrDefaultAsync(b => b.Id == boardId);
@@ -95,6 +97,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpPost("update-item")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> UpdateItem(Guid itemId, double posX, double posY, double width, double height, double rotation, int zIndex)
     {
         var item = await _context.BoardItems.FirstOrDefaultAsync(bi => bi.Id == itemId);
@@ -119,6 +122,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpPost("add-text")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AddText(Guid boardId, string text, double posX, double posY)
     {
         var board = await _context.Boards.FirstOrDefaultAsync(b => b.Id == boardId);
@@ -148,6 +152,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> Delete(Guid id)
     {
         var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == id);
@@ -167,6 +172,7 @@ public class PhotosController : ControllerBase
     }
 
     [HttpDelete("item/{id}")]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> DeleteItem(Guid id)
     {
         var item = await _context.BoardItems

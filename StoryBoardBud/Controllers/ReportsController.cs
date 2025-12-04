@@ -23,6 +23,7 @@ public class ReportsController : ControllerBase
     }
 
     [HttpPost]
+    [IgnoreAntiforgeryToken]
     public async Task<IActionResult> CreateReport(Guid photoId, string reason, string? description)
     {
         var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == photoId);

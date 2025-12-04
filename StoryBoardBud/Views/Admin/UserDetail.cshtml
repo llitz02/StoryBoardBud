@@ -71,6 +71,7 @@
                     @if (Model.LockoutEnd.HasValue && Model.LockoutEnd > DateTimeOffset.UtcNow)
                     {
                         <form method="post" action="@Url.Action("UnlockUser")" class="mb-2">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@Model.Id">
                             <button type="submit" class="btn btn-sm btn-success w-100">Unlock User</button>
                         </form>
@@ -78,12 +79,14 @@
                     else
                     {
                         <form method="post" action="@Url.Action("LockUser")" class="mb-2">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@Model.Id">
                             <button type="submit" class="btn btn-sm btn-warning w-100" onclick="return confirm('Lock this user?')">Lock User</button>
                         </form>
                     }
 
                     <form method="post" action="@Url.Action("DeleteUser")">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.Id">
                         <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Delete user and all their content? This cannot be undone.')">Delete User</button>
                     </form>

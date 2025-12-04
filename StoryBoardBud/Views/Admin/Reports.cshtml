@@ -71,11 +71,13 @@
                                 @if (report.Status == StoryBoardBud.Data.ReportStatus.Pending)
                                 {
                                     <form method="post" action="@Url.Action("ApproveReport")" style="display: inline;">
+                                        @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@report.Id">
                                         <input type="hidden" name="adminNotes" value="">
                                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Approve this report?')">Approve</button>
                                     </form>
                                     <form method="post" action="@Url.Action("RejectReport")" style="display: inline;">
+                                        @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@report.Id">
                                         <input type="hidden" name="adminNotes" value="">
                                         <button type="submit" class="btn btn-sm btn-success">Reject</button>
