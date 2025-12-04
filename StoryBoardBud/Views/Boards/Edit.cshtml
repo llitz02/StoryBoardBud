@@ -1,0 +1,271 @@
+@model StoryBoardBud.Data.Board
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5>@Model.Title</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">@Model.Description</p>
+                    
+                    <div class="mb-3">
+                        <h6>Upload Photo</h6>
+                        <input type="file" id="photoUpload" accept="image/*" class="form-control form-control-sm">
+                        <small class="text-muted">Max 10MB</small>
+                        <div id="uploadProgress" class="mt-2" style="display:none;">
+                            <div class="progress">
+                                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Add Text</h6>
+                        <input type="text" id="textInput" placeholder="Enter text" class="form-control form-control-sm mb-2">
+                        <button class="btn btn-sm btn-primary" onclick="addText()">Add Text</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Browse Public Photos</h6>
+                        <div id="discoverPhotos" style="max-height: 300px; overflow-y: auto;">
+                            <p class="text-muted small">Loading...</p>
+                        </div>
+                    </div>
+
+                    <a href="@Url.Action("MyBoards")" class="btn btn-sm btn-secondary">Back to Boards</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div id="boardCanvas" class="board-canvas" style="position: relative; background: #f5f5f5; border: 1px solid #ddd; height: 600px; overflow: auto;">
+                @foreach (var item in Model.Items)
+                {
+                    if (item.Photo != null)
+                    {
+                        <div class="board-item" data-id="@item.Id" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex; transform: rotate(@(item.Rotation)deg);">
+                            <img src="@item.Photo.FilePath" alt="Photo" style="width: 100%; height: 100%; object-fit: cover; border: 2px solid #ddd; cursor: move;">
+                            <button class="btn-close btn-sm" onclick="deleteItem('@item.Id')" style="position: absolute; top: 5px; right: 5px;"></button>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(item.TextContent))
+                    {
+                        <div class="board-item" data-id="@item.Id" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex;">
+                            <div contenteditable="true" class="text-item" style="width: 100%; height: 100%; padding: 8px; border: 2px solid #ddd; background: white; overflow: hidden; word-wrap: break-word; cursor: move;">@item.TextContent</div>
+                            <button class="btn-close btn-sm" onclick="deleteItem('@item.Id')" style="position: absolute; top: 5px; right: 5px;"></button>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .board-canvas {
+        position: relative;
+        user-select: none;
+    }
+
+    .board-item {
+        cursor: move;
+        touch-action: none;
+    }
+
+    .board-item:hover {
+        outline: 2px solid #007bff;
+    }
+
+    .board-item.selected {
+        outline: 3px solid #28a745;
+        z-index: 1000;
+    }
+
+    .text-item {
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        white-space: pre-wrap;
+    }
+</style>
+
+<script>
+    const boardId = '@Model.Id';
+    let selectedItem = null;
+    let offset = { x: 0, y: 0 };
+
+    // Photo upload
+    document.getElementById('photoUpload').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('isPrivate', false);
+
+        try {
+            document.getElementById('uploadProgress').style.display = 'block';
+            const response = await fetch('/api/photos/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+            const data = await response.json();
+
+            // Add to board
+            await fetch('/api/photos/add-to-board', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    boardId: boardId,
+                    photoId: data.id,
+                    posX: 50,
+                    posY: 50
+                })
+            });
+
+            location.reload();
+        } catch (err) {
+            alert('Error uploading photo: ' + err.message);
+        }
+    });
+
+    // Drag and drop handling
+    const boardItems = document.querySelectorAll('.board-item');
+    boardItems.forEach(item => {
+        item.addEventListener('mousedown', startDrag);
+        item.addEventListener('touchstart', startDrag);
+    });
+
+    function startDrag(e) {
+        selectedItem = this.closest('.board-item');
+        selectedItem.classList.add('selected');
+
+        const rect = selectedItem.getBoundingClientRect();
+        const canvasRect = document.getElementById('boardCanvas').getBoundingClientRect();
+        
+        offset.x = e.clientX - rect.left;
+        offset.y = e.clientY - rect.top;
+
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchend', stopDrag);
+
+        e.preventDefault();
+    }
+
+    function drag(e) {
+        if (!selectedItem) return;
+
+        const canvasRect = document.getElementById('boardCanvas').getBoundingClientRect();
+        const x = e.clientX - canvasRect.left - offset.x;
+        const y = e.clientY - canvasRect.top - offset.y;
+
+        selectedItem.style.left = Math.max(0, x) + 'px';
+        selectedItem.style.top = Math.max(0, y) + 'px';
+    }
+
+    async function stopDrag() {
+        if (!selectedItem) return;
+
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('touchmove', drag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchend', stopDrag);
+
+        const itemId = selectedItem.dataset.id;
+        const posX = parseFloat(selectedItem.style.left);
+        const posY = parseFloat(selectedItem.style.top);
+
+        await fetch('/api/photos/update-item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                itemId: itemId,
+                posX: posX,
+                posY: posY,
+                width: selectedItem.offsetWidth,
+                height: selectedItem.offsetHeight,
+                rotation: 0,
+                zIndex: 0
+            })
+        });
+
+        selectedItem.classList.remove('selected');
+        selectedItem = null;
+    }
+
+    function addText() {
+        const text = document.getElementById('textInput').value;
+        if (!text.trim()) {
+            alert('Please enter text');
+            return;
+        }
+
+        fetch('/api/photos/add-text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                boardId: boardId,
+                text: text,
+                posX: 100,
+                posY: 100
+            })
+        }).then(() => location.reload());
+    }
+
+    function deleteItem(itemId) {
+        if (confirm('Delete this item?')) {
+            fetch(`/api/photos/item/${itemId}`, { method: 'DELETE' })
+                .then(() => location.reload());
+        }
+    }
+
+    // Load discover photos
+    async function loadDiscoverPhotos() {
+        try {
+            const response = await fetch('/discover/api/photos?pageSize=5');
+            const data = await response.json();
+            const container = document.getElementById('discoverPhotos');
+            
+            if (data.data.length === 0) {
+                container.innerHTML = '<p class="text-muted small">No photos available</p>';
+                return;
+            }
+
+            container.innerHTML = data.data.map(photo => `
+                <div class="mb-2" style="cursor: pointer; border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+                    <img src="/${photo.filePath}" style="width: 100%; height: 80px; object-fit: cover;" 
+                         onclick="addPhotoToBoard('${photo.id}')">
+                    <small class="text-muted d-block p-1">by ${photo.uploadedBy}</small>
+                </div>
+            `).join('');
+        } catch (err) {
+            console.error('Error loading discover photos:', err);
+        }
+    }
+
+    async function addPhotoToBoard(photoId) {
+        await fetch('/api/photos/add-to-board', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                boardId: boardId,
+                photoId: photoId,
+                posX: 50,
+                posY: 50
+            })
+        });
+        location.reload();
+    }
+
+    // Load photos on page load
+    loadDiscoverPhotos();
+</script>

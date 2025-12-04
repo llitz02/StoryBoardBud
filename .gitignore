@@ -1,0 +1,30 @@
+# SQLite database
+*.db
+*.db-shm
+*.db-wal
+
+# Uploads
+wwwroot/uploads/
+
+# Build results
+bin/
+obj/
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.sln.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+packages/

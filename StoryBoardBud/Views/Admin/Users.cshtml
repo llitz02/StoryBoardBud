@@ -1,0 +1,87 @@
+@model IEnumerable<StoryBoardBud.Data.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Manage Users";
+    var currentPage = (int?)ViewBag.CurrentPage ?? 1;
+    var totalPages = (int?)ViewBag.TotalPages ?? 1;
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">User Management</h2>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Full Name</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@(user.FullName ?? "-")</td>
+                    <td>@user.CreatedAt.ToString("g")</td>
+                    <td>
+                        @if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow)
+                        {
+                            <span class="badge bg-danger">Locked</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("UserDetail", new { id = user.Id })" class="btn btn-sm btn-info">View</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=@(currentPage - 1)">Previous</a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                {
+                    @if (i == currentPage)
+                    {
+                        <li class="page-item active"><span class="page-link">@i</span></li>
+                    }
+                    else
+                    {
+                        <li class="page-item"><a class="page-link" href="?page=@i">@i</a></li>
+                    }
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="?page=@(currentPage + 1)">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=@totalPages">Last</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

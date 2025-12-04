@@ -1,0 +1,60 @@
+@model IEnumerable<StoryBoardBud.Data.Board>
+
+@{
+    ViewData["Title"] = "My Boards";
+}
+
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>My Storyboards</h2>
+        </div>
+        <div class="col text-end">
+            <a href="@Url.Action("Create")" class="btn btn-primary">+ Create New Board</a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <p>You haven't created any storyboards yet. <a href="@Url.Action("Create")">Create your first board!</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var board in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">@board.Title</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text text-muted">@(board.Description ?? "No description")</p>
+                            <small class="text-muted">@board.Items.Count item(s)</small>
+                            <p class="text-muted small">Created: @board.CreatedAt.ToString("g")</p>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <a href="@Url.Action("Edit", new { id = board.Id })" class="btn btn-sm btn-primary">Edit</a>
+                            <button onclick="deleteBoard('@board.Id')" class="btn btn-sm btn-danger">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    function deleteBoard(boardId) {
+        if (confirm('Are you sure you want to delete this board?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/boards/delete';
+            form.innerHTML = `<input type="hidden" name="id" value="${boardId}">`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>

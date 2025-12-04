@@ -1,0 +1,72 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">Welcome to StoryBoardBud</h1>
+        <p class="lead">Create beautiful storyboards, share ideas, and bring your vision to life</p>
+        @if (!User.Identity?.IsAuthenticated == true)
+        {
+            <div class="mt-4">
+                <a href="/Identity/Account/Register" class="btn btn-primary btn-lg me-2">Get Started</a>
+                <a href="/Identity/Account/Login" class="btn btn-outline-primary btn-lg">Sign In</a>
+            </div>
+        }
+        else
+        {
+            <div class="mt-4">
+                <a href="@Url.Action("MyBoards", "Boards")" class="btn btn-primary btn-lg me-2">My Boards</a>
+                <a href="@Url.Action("Create", "Boards")" class="btn btn-success btn-lg">Create New Board</a>
+            </div>
+        }
+    </div>
+
+    <div class="row g-4 mt-5">
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">📸 Organize</h5>
+                    <p class="card-text">Upload photos and organize them on your storyboard canvas with drag-and-drop ease</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">✏️ Annotate</h5>
+                    <p class="card-text">Add text, notes, and ideas directly to your boards to flesh out your concepts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">🌍 Discover</h5>
+                    <p class="card-text">Explore community photos and discover inspiration from other creators</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="mt-5">
+            <h3 class="mb-4">Quick Actions</h3>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <a href="@Url.Action("MyBoards", "Boards")" class="btn btn-outline-primary w-100 py-3">
+                        <strong>View My Boards</strong><br>
+                        <small>Access all your storyboards</small>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="@Url.Action("Index", "Discover")" class="btn btn-outline-success w-100 py-3">
+                        <strong>Explore Community</strong><br>
+                        <small>Find photos to add to your boards</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
