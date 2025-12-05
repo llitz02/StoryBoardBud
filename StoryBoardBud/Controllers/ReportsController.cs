@@ -24,9 +24,9 @@ public class ReportsController : ControllerBase
 
     [HttpPost]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> CreateReport(Guid photoId, string reason, string? description)
+    public async Task<IActionResult> CreateReport([FromBody] CreateReportRequest request)
     {
-        var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == photoId);
+        var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == request.PhotoId);
         if (photo == null)
             return NotFound("Photo not found");
 
@@ -34,7 +34,7 @@ public class ReportsController : ControllerBase
 
         // Check if user already reported this photo
         var existingReport = await _context.Reports
-            .FirstOrDefaultAsync(r => r.PhotoId == photoId && r.ReportedById == userId);
+            .FirstOrDefaultAsync(r => r.PhotoId == request.PhotoId && r.ReportedById == userId);
         
         if (existingReport != null)
             return BadRequest("You have already reported this photo");
@@ -42,10 +42,10 @@ public class ReportsController : ControllerBase
         var report = new Report
         {
             Id = Guid.NewGuid(),
-            PhotoId = photoId,
+            PhotoId = request.PhotoId,
             ReportedById = userId!,
-            Reason = reason,
-            Description = description,
+            Reason = request.Reason,
+            Description = request.Description,
             Status = ReportStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };
@@ -53,7 +53,7 @@ public class ReportsController : ControllerBase
         _context.Reports.Add(report);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation($"Report created: {report.Id} for Photo: {photoId} by User: {userId}");
+        _logger.LogInformation($"Report created: {report.Id} for Photo: {request.PhotoId} by User: {userId}");
 
         return Ok(new { id = report.Id, message = "Report submitted successfully" });
     }

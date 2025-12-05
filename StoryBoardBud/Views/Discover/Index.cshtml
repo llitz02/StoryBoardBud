@@ -35,7 +35,10 @@
                             <small class="text-muted">by <strong>@photo.UploadedBy.UserName</strong></small>
                             <p class="text-muted small">@photo.CreatedAt.ToString("g")</p>
                         </div>
-                        <div class="card-footer bg-light">
+                        <div class="card-footer bg-light d-flex justify-content-between">
+                            <button onclick="toggleFavorite('@photo.Id', this)" class="btn btn-sm btn-outline-danger favorite-btn" data-photo-id="@photo.Id">
+                                <i class="bi bi-heart"></i> Favorite
+                            </button>
                             <button onclick="reportPhoto('@photo.Id')" class="btn btn-sm btn-warning">Report</button>
                         </div>
                     </div>
@@ -120,6 +123,55 @@
 </div>
 
 <script>
+    // Load favorite states on page load
+    document.addEventListener('DOMContentLoaded', async () => {
+        const buttons = document.querySelectorAll('.favorite-btn');
+        for (const btn of buttons) {
+            const photoId = btn.dataset.photoId;
+            try {
+                const response = await fetch(`/api/favorites/check/${photoId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.isFavorited) {
+                        btn.classList.remove('btn-outline-danger');
+                        btn.classList.add('btn-danger');
+                        btn.innerHTML = '<i class="bi bi-heart-fill"></i> Favorited';
+                    }
+                }
+            } catch (err) {
+                console.error('Error checking favorite:', err);
+            }
+        }
+    });
+
+    async function toggleFavorite(photoId, button) {
+        const isFavorited = button.classList.contains('btn-danger');
+        
+        try {
+            const response = await fetch(`/api/favorites/${photoId}`, {
+                method: isFavorited ? 'DELETE' : 'POST'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+            }
+
+            // Toggle button appearance
+            if (isFavorited) {
+                button.classList.remove('btn-danger');
+                button.classList.add('btn-outline-danger');
+                button.innerHTML = '<i class="bi bi-heart"></i> Favorite';
+            } else {
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-danger');
+                button.innerHTML = '<i class="bi bi-heart-fill"></i> Favorited';
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
     function reportPhoto(photoId) {
         document.getElementById('reportPhotoId').value = photoId;
         const modal = new bootstrap.Modal(document.getElementById('reportModal'));

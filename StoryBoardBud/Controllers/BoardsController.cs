@@ -131,4 +131,41 @@ public class BoardsController : Controller
 
         return Json(board);
     }
+
+    [HttpGet("api/boards/my-boards")]
+    public async Task<IActionResult> GetMyBoards()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+            return Unauthorized();
+
+        var boards = await _context.Boards
+            .Where(b => b.OwnerId == userId)
+            .OrderByDescending(b => b.UpdatedAt ?? b.CreatedAt)
+            .Select(b => new
+            {
+                b.Id,
+                b.Title,
+                b.Description
+            })
+            .ToListAsync();
+
+        return Json(boards);
+    }
+
+    public async Task<IActionResult> MyFavorites()
+    {
+        var userId = _userManager.GetUserId(User);
+        if (userId == null)
+            return Unauthorized();
+
+        var favorites = await _context.FavoritePhotos
+            .Where(f => f.UserId == userId)
+            .Include(f => f.Photo)
+                .ThenInclude(p => p.UploadedBy)
+            .OrderByDescending(f => f.FavoritedAt)
+            .ToListAsync();
+
+        return View(favorites);
+    }
 }

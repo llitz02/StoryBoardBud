@@ -63,9 +63,9 @@ public class PhotosController : ControllerBase
 
     [HttpPost("add-to-board")]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> AddToBoard(Guid boardId, Guid photoId, double posX, double posY, double width = 200, double height = 200)
+    public async Task<IActionResult> AddToBoard([FromBody] AddToBoardRequest request)
     {
-        var board = await _context.Boards.FirstOrDefaultAsync(b => b.Id == boardId);
+        var board = await _context.Boards.FirstOrDefaultAsync(b => b.Id == request.BoardId);
         if (board == null)
             return NotFound("Board not found");
 
@@ -73,19 +73,19 @@ public class PhotosController : ControllerBase
         if (board.OwnerId != userId)
             return Forbid();
 
-        var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == photoId);
+        var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == request.PhotoId);
         if (photo == null)
             return NotFound("Photo not found");
 
         var boardItem = new BoardItem
         {
             Id = Guid.NewGuid(),
-            BoardId = boardId,
-            PhotoId = photoId,
-            PositionX = posX,
-            PositionY = posY,
-            Width = width,
-            Height = height,
+            BoardId = request.BoardId,
+            PhotoId = request.PhotoId,
+            PositionX = request.PosX,
+            PositionY = request.PosY,
+            Width = request.Width,
+            Height = request.Height,
             ZIndex = 0,
             CreatedAt = DateTime.UtcNow
         };
@@ -98,9 +98,9 @@ public class PhotosController : ControllerBase
 
     [HttpPost("update-item")]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> UpdateItem(Guid itemId, double posX, double posY, double width, double height, double rotation, int zIndex)
+    public async Task<IActionResult> UpdateItem([FromBody] UpdateItemRequest request)
     {
-        var item = await _context.BoardItems.FirstOrDefaultAsync(bi => bi.Id == itemId);
+        var item = await _context.BoardItems.FirstOrDefaultAsync(bi => bi.Id == request.ItemId);
         if (item == null)
             return NotFound();
 
@@ -109,12 +109,12 @@ public class PhotosController : ControllerBase
         if (board?.OwnerId != userId)
             return Forbid();
 
-        item.PositionX = posX;
-        item.PositionY = posY;
-        item.Width = width;
-        item.Height = height;
-        item.Rotation = rotation;
-        item.ZIndex = zIndex;
+        item.PositionX = request.PosX;
+        item.PositionY = request.PosY;
+        item.Width = request.Width;
+        item.Height = request.Height;
+        item.Rotation = request.Rotation;
+        item.ZIndex = request.ZIndex;
         item.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -123,9 +123,9 @@ public class PhotosController : ControllerBase
 
     [HttpPost("add-text")]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> AddText(Guid boardId, string text, double posX, double posY)
+    public async Task<IActionResult> AddText([FromBody] AddTextRequest request)
     {
-        var board = await _context.Boards.FirstOrDefaultAsync(b => b.Id == boardId);
+        var board = await _context.Boards.FirstOrDefaultAsync(b => b.Id == request.BoardId);
         if (board == null)
             return NotFound();
 
@@ -136,10 +136,10 @@ public class PhotosController : ControllerBase
         var boardItem = new BoardItem
         {
             Id = Guid.NewGuid(),
-            BoardId = boardId,
-            TextContent = text,
-            PositionX = posX,
-            PositionY = posY,
+            BoardId = request.BoardId,
+            TextContent = request.Text,
+            PositionX = request.PosX,
+            PositionY = request.PosY,
             Width = 300,
             Height = 100,
             CreatedAt = DateTime.UtcNow

@@ -1,0 +1,144 @@
+@model IEnumerable<StoryBoardBud.Data.FavoritePhoto>
+
+@{
+    ViewData["Title"] = "My Favorites";
+}
+
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>My Favorite Photos</h2>
+            <p class="text-muted">Photos you've saved for inspiration</p>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <p>You haven't favorited any photos yet. Browse the <a href="@Url.Action("Index", "Discover")">Discover</a> page to find photos you love!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var favorite in Model)
+            {
+                <div class="col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="position-relative" style="height: 250px; overflow: hidden;">
+                            <img src="/@favorite.Photo.FilePath" alt="@favorite.Photo.FileName" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">@favorite.Photo.FileName</h6>
+                            <small class="text-muted">by <strong>@favorite.Photo.UploadedBy.UserName</strong></small>
+                            <p class="text-muted small">Added @favorite.FavoritedAt.ToString("g")</p>
+                        </div>
+                        <div class="card-footer bg-light d-flex justify-content-between">
+                            <button onclick="addToBoard('@favorite.PhotoId')" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus"></i> Add to Board
+                            </button>
+                            <button onclick="removeFavorite('@favorite.PhotoId')" class="btn btn-sm btn-danger">
+                                <i class="bi bi-heart-fill"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Board Selection Modal -->
+<div class="modal fade" id="boardModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select a Board</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="selectedPhotoId">
+                <div id="boardsList" class="list-group">
+                    <p class="text-muted">Loading boards...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let boardsCache = null;
+
+    async function addToBoard(photoId) {
+        document.getElementById('selectedPhotoId').value = photoId;
+        
+        // Load user's boards if not cached
+        if (!boardsCache) {
+            try {
+                const response = await fetch('/api/boards/my-boards');
+                if (!response.ok) throw new Error('Failed to load boards');
+                boardsCache = await response.json();
+            } catch (err) {
+                alert('Error loading boards: ' + err.message);
+                return;
+            }
+        }
+
+        // Populate boards list
+        const boardsList = document.getElementById('boardsList');
+        if (boardsCache.length === 0) {
+            boardsList.innerHTML = '<p class="text-muted">No boards found. <a href="/Boards/Create">Create one</a> first!</p>';
+        } else {
+            boardsList.innerHTML = boardsCache.map(board => `
+                <button class="list-group-item list-group-item-action" onclick="selectBoard('${board.id}', '${photoId}')">
+                    <strong>${board.title}</strong>
+                    <br><small class="text-muted">${board.description || 'No description'}</small>
+                </button>
+            `).join('');
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('boardModal'));
+        modal.show();
+    }
+
+    async function selectBoard(boardId, photoId) {
+        try {
+            const response = await fetch('/api/photos/add-to-board', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    boardId: boardId,
+                    photoId: photoId,
+                    posX: 50,
+                    posY: 50
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to add photo to board');
+
+            alert('Photo added to board successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('boardModal')).hide();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    async function removeFavorite(photoId) {
+        if (!confirm('Remove this photo from favorites?')) return;
+
+        try {
+            const response = await fetch(`/api/favorites/${photoId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error('Failed to remove favorite');
+
+            location.reload();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+</script>

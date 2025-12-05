@@ -13,4 +13,5 @@ public class ApplicationUser : IdentityUser
     public ICollection<Board> Boards { get; set; } = new List<Board>();
     public ICollection<Photo> UploadedPhotos { get; set; } = new List<Photo>();
     public ICollection<Report> Reports { get; set; } = new List<Report>();
+    public ICollection<FavoritePhoto> FavoritePhotos { get; set; } = new List<FavoritePhoto>();
 }

@@ -14,4 +14,5 @@ public class Photo
     // Navigation properties
     public ICollection<BoardItem> BoardItems { get; set; } = new List<BoardItem>();
     public ICollection<Report> Reports { get; set; } = new List<Report>();
+    public ICollection<FavoritePhoto> FavoritedByUsers { get; set; } = new List<FavoritePhoto>();
 }

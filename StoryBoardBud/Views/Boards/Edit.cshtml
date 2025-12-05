@@ -32,8 +32,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <h6>Browse Public Photos</h6>
-                        <div id="discoverPhotos" style="max-height: 300px; overflow-y: auto;">
+                        <h6>My Favorite Photos</h6>
+                        <div id="favoritePhotos" style="max-height: 300px; overflow-y: auto;">
                             <p class="text-muted small">Loading...</p>
                         </div>
                     </div>
@@ -49,15 +49,23 @@
                 {
                     if (item.Photo != null)
                     {
-                        <div class="board-item" data-id="@item.Id" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex; transform: rotate(@(item.Rotation)deg);">
-                            <img src="@item.Photo.FilePath" alt="Photo" style="width: 100%; height: 100%; object-fit: cover; border: 2px solid #ddd; cursor: move;">
+                        <div class="board-item" data-id="@item.Id" data-zindex="@item.ZIndex" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex; transform: rotate(@(item.Rotation)deg);">
+                            <img src="/@item.Photo.FilePath" alt="Photo" style="width: 100%; height: 100%; object-fit: cover; border: 2px solid #ddd; cursor: move;">
+                            <div class="item-controls" style="position: absolute; top: 5px; left: 5px; display: none; background: rgba(255,255,255,0.9); border-radius: 4px; padding: 2px;">
+                                <button class="btn btn-sm btn-light" onclick="bringForward('@item.Id')" title="Bring Forward">▲</button>
+                                <button class="btn btn-sm btn-light" onclick="sendBackward('@item.Id')" title="Send Backward">▼</button>
+                            </div>
                             <button class="btn-close btn-sm" onclick="deleteItem('@item.Id')" style="position: absolute; top: 5px; right: 5px;"></button>
                         </div>
                     }
                     else if (!string.IsNullOrEmpty(item.TextContent))
                     {
-                        <div class="board-item" data-id="@item.Id" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex;">
+                        <div class="board-item" data-id="@item.Id" data-zindex="@item.ZIndex" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex;">
                             <div contenteditable="true" class="text-item" style="width: 100%; height: 100%; padding: 8px; border: 2px solid #ddd; background: white; overflow: hidden; word-wrap: break-word; cursor: move;">@item.TextContent</div>
+                            <div class="item-controls" style="position: absolute; top: 5px; left: 5px; display: none; background: rgba(255,255,255,0.9); border-radius: 4px; padding: 2px;">
+                                <button class="btn btn-sm btn-light" onclick="bringForward('@item.Id')" title="Bring Forward">▲</button>
+                                <button class="btn btn-sm btn-light" onclick="sendBackward('@item.Id')" title="Send Backward">▼</button>
+                            </div>
                             <button class="btn-close btn-sm" onclick="deleteItem('@item.Id')" style="position: absolute; top: 5px; right: 5px;"></button>
                         </div>
                     }
@@ -80,6 +88,10 @@
 
     .board-item:hover {
         outline: 2px solid #007bff;
+    }
+
+    .board-item:hover .item-controls {
+        display: block !important;
     }
 
     .board-item.selected {
@@ -109,17 +121,24 @@
         formData.append('isPrivate', false);
 
         try {
+            console.log('Uploading photo...');
             document.getElementById('uploadProgress').style.display = 'block';
             const response = await fetch('/api/photos/upload', {
                 method: 'POST',
                 body: formData
             });
 
-            if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Upload failed:', response.status, errorText);
+                throw new Error('Upload failed: ' + response.status);
+            }
             const data = await response.json();
+            console.log('Photo uploaded:', data);
 
             // Add to board
-            await fetch('/api/photos/add-to-board', {
+            console.log('Adding to board:', boardId);
+            const addResponse = await fetch('/api/photos/add-to-board', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -130,9 +149,18 @@
                 })
             });
 
+            if (!addResponse.ok) {
+                const errorText = await addResponse.text();
+                console.error('Add to board failed:', addResponse.status, errorText);
+                throw new Error('Failed to add to board: ' + addResponse.status);
+            }
+
+            console.log('Reloading page...');
             location.reload();
         } catch (err) {
+            console.error('Error:', err);
             alert('Error uploading photo: ' + err.message);
+            document.getElementById('uploadProgress').style.display = 'none';
         }
     });
 
@@ -183,6 +211,7 @@
         const itemId = selectedItem.dataset.id;
         const posX = parseFloat(selectedItem.style.left);
         const posY = parseFloat(selectedItem.style.top);
+        const currentZIndex = parseInt(selectedItem.dataset.zindex || 0);
 
         await fetch('/api/photos/update-item', {
             method: 'POST',
@@ -194,7 +223,7 @@
                 width: selectedItem.offsetWidth,
                 height: selectedItem.offsetHeight,
                 rotation: 0,
-                zIndex: 0
+                zIndex: currentZIndex
             })
         });
 
@@ -209,6 +238,7 @@
             return;
         }
 
+        console.log('Adding text to board:', boardId, text);
         fetch('/api/photos/add-text', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -218,7 +248,25 @@
                 posX: 100,
                 posY: 100
             })
-        }).then(() => location.reload());
+        })
+        .then(response => {
+            console.log('Add text response:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    console.error('Add text failed:', text);
+                    throw new Error('Failed to add text: ' + response.status);
+                });
+            }
+            return response;
+        })
+        .then(() => {
+            console.log('Text added, reloading...');
+            location.reload();
+        })
+        .catch(err => {
+            console.error('Error adding text:', err);
+            alert('Error adding text: ' + err.message);
+        });
     }
 
     function deleteItem(itemId) {
@@ -228,27 +276,28 @@
         }
     }
 
-    // Load discover photos
-    async function loadDiscoverPhotos() {
+    // Load favorite photos
+    async function loadFavoritePhotos() {
         try {
-            const response = await fetch('/discover/api/photos?pageSize=5');
+            const response = await fetch('/api/favorites');
             const data = await response.json();
-            const container = document.getElementById('discoverPhotos');
+            const container = document.getElementById('favoritePhotos');
             
-            if (data.data.length === 0) {
-                container.innerHTML = '<p class="text-muted small">No photos available</p>';
+            if (data.length === 0) {
+                container.innerHTML = '<p class="text-muted small">No favorites yet. <a href=\"/Discover\">Add some</a>!</p>';
                 return;
             }
 
-            container.innerHTML = data.data.map(photo => `
+            container.innerHTML = data.map(fav => `
                 <div class="mb-2" style="cursor: pointer; border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
-                    <img src="/${photo.filePath}" style="width: 100%; height: 80px; object-fit: cover;" 
-                         onclick="addPhotoToBoard('${photo.id}')">
-                    <small class="text-muted d-block p-1">by ${photo.uploadedBy}</small>
+                    <img src="/${fav.photo.filePath}" style="width: 100%; height: 80px; object-fit: cover;" 
+                         onclick="addPhotoToBoard('${fav.photo.id}')">
+                    <small class="text-muted d-block p-1">by ${fav.photo.uploadedBy}</small>
                 </div>
             `).join('');
         } catch (err) {
-            console.error('Error loading discover photos:', err);
+            console.error('Error loading favorites:', err);
+            document.getElementById('favoritePhotos').innerHTML = '<p class="text-muted small">Error loading favorites</p>';
         }
     }
 
@@ -266,6 +315,49 @@
         location.reload();
     }
 
+    function bringForward(itemId) {
+        const item = document.querySelector(`[data-id="${itemId}"]`);
+        if (!item) return;
+
+        const currentZ = parseInt(item.dataset.zindex || 0);
+        const newZ = currentZ + 1;
+        
+        item.style.zIndex = newZ;
+        item.dataset.zindex = newZ;
+
+        updateItemZIndex(itemId, newZ);
+    }
+
+    function sendBackward(itemId) {
+        const item = document.querySelector(`[data-id="${itemId}"]`);
+        if (!item) return;
+
+        const currentZ = parseInt(item.dataset.zindex || 0);
+        const newZ = Math.max(0, currentZ - 1);
+        
+        item.style.zIndex = newZ;
+        item.dataset.zindex = newZ;
+
+        updateItemZIndex(itemId, newZ);
+    }
+
+    async function updateItemZIndex(itemId, zIndex) {
+        const item = document.querySelector(`[data-id="${itemId}"]`);
+        await fetch('/api/photos/update-item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                itemId: itemId,
+                posX: parseFloat(item.style.left),
+                posY: parseFloat(item.style.top),
+                width: item.offsetWidth,
+                height: item.offsetHeight,
+                rotation: 0,
+                zIndex: zIndex
+            })
+        });
+    }
+
     // Load photos on page load
-    loadDiscoverPhotos();
+    loadFavoritePhotos();
 </script>
