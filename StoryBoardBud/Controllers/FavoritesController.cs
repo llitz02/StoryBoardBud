@@ -6,6 +6,9 @@ using StoryBoardBud.Data;
 
 namespace StoryBoardBud.Controllers;
 
+/// <summary>
+/// Manages user's favorite photos
+/// </summary>
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
@@ -14,12 +17,22 @@ public class FavoritesController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
 
+    /// <summary>
+    /// Initializes the FavoritesController with database and user management
+    /// </summary>
+    /// <param name="context">Database context for data access</param>
+    /// <param name="userManager">User manager for authentication</param>
     public FavoritesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _userManager = userManager;
     }
 
+    /// <summary>
+    /// Adds a photo to user's favorites
+    /// </summary>
+    /// <param name="photoId">Photo ID to favorite</param>
+    /// <returns>Success message or error</returns>
     [HttpPost("{photoId}")]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> AddFavorite(Guid photoId)
@@ -52,6 +65,11 @@ public class FavoritesController : ControllerBase
         return Ok(new { message = "Added to favorites" });
     }
 
+    /// <summary>
+    /// Removes a photo from user's favorites
+    /// </summary>
+    /// <param name="photoId">Photo ID to unfavorite</param>
+    /// <returns>Success message or error</returns>
     [HttpDelete("{photoId}")]
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> RemoveFavorite(Guid photoId)
@@ -72,6 +90,10 @@ public class FavoritesController : ControllerBase
         return Ok(new { message = "Removed from favorites" });
     }
 
+    /// <summary>
+    /// Gets all favorite photos for current user
+    /// </summary>
+    /// <returns>JSON with favorited photos</returns>
     [HttpGet]
     public async Task<IActionResult> GetMyFavorites()
     {
@@ -103,6 +125,11 @@ public class FavoritesController : ControllerBase
         return Ok(favorites);
     }
 
+    /// <summary>
+    /// Checks if a photo is favorited by current user
+    /// </summary>
+    /// <param name="photoId">Photo ID to check</param>
+    /// <returns>JSON with favorite status</returns>
     [HttpGet("check/{photoId}")]
     public async Task<IActionResult> CheckFavorite(Guid photoId)
     {

@@ -1,5 +1,8 @@
 namespace StoryBoardBud.Data;
 
+/// <summary>
+/// Links a user to their favorited photos
+/// </summary>
 public class FavoritePhoto
 {
     public Guid Id { get; set; }

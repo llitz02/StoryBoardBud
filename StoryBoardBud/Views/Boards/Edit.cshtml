@@ -15,25 +15,25 @@
                     <p class="text-muted">@Model.Description</p>
                     
                     <div class="mb-3">
-                        <h6>Upload Photo</h6>
-                        <input type="file" id="photoUpload" accept="image/*" class="form-control form-control-sm">
-                        <small class="text-muted">Max 10MB</small>
-                        <div id="uploadProgress" class="mt-2" style="display:none;">
+                        <label for="photoUpload" class="h6">Upload Photo</label>
+                        <input type="file" id="photoUpload" accept="image/*" class="form-control form-control-sm" aria-label="Upload photo to board">
+                        <small class="text-muted" id="photoUploadHelp">Max 10MB</small>
+                        <div id="uploadProgress" class="mt-2" style="display:none;" aria-live="polite" aria-atomic="true">
                             <div class="progress">
-                                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+                                <div id="progressBar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <h6>Add Text</h6>
-                        <input type="text" id="textInput" placeholder="Enter text" class="form-control form-control-sm mb-2">
-                        <button class="btn btn-sm btn-primary" onclick="addText()">Add Text</button>
+                        <label for="textInput" class="h6">Add Text</label>
+                        <input type="text" id="textInput" placeholder="Enter text" class="form-control form-control-sm mb-2" aria-label="Text to add to board">
+                        <button class="btn btn-sm btn-primary" onclick="addText()" type="button" aria-label="Add text to board">Add Text</button>
                     </div>
 
                     <div class="mb-3">
-                        <h6>My Favorite Photos</h6>
-                        <div id="favoritePhotos" style="max-height: 300px; overflow-y: auto;">
+                        <h6 id="favoritesHeading">My Favorite Photos</h6>
+                        <div id="favoritePhotos" style="max-height: 300px; overflow-y: auto;" role="region" aria-labelledby="favoritesHeading" aria-live="polite">
                             <p class="text-muted small">Loading...</p>
                         </div>
                     </div>
@@ -44,29 +44,31 @@
         </div>
 
         <div class="col-md-9">
-            <div id="boardCanvas" class="board-canvas" style="position: relative; background: #f5f5f5; border: 1px solid #ddd; height: 600px; overflow: auto;">
+            <div id="boardCanvas" class="board-canvas" role="application" aria-label="Storyboard canvas - drag items to arrange" tabindex="0" style="position: relative; background: #f5f5f5; border: 1px solid #ddd; height: 600px; overflow: auto;">
                 @foreach (var item in Model.Items)
                 {
                     if (item.Photo != null)
                     {
-                        <div class="board-item" data-id="@item.Id" data-zindex="@item.ZIndex" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex; transform: rotate(@(item.Rotation)deg);">
-                            <img src="/@item.Photo.FilePath" alt="Photo" style="width: 100%; height: 100%; object-fit: cover; border: 2px solid #ddd; cursor: move;">
-                            <div class="item-controls" style="position: absolute; top: 5px; left: 5px; display: none; background: rgba(255,255,255,0.9); border-radius: 4px; padding: 2px;">
-                                <button class="btn btn-sm btn-light" onclick="bringForward('@item.Id')" title="Bring Forward">▲</button>
-                                <button class="btn btn-sm btn-light" onclick="sendBackward('@item.Id')" title="Send Backward">▼</button>
+                        <div class="board-item" data-id="@item.Id" data-zindex="@item.ZIndex" role="img" aria-label="Photo item - draggable" tabindex="0" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex; transform: rotate(@(item.Rotation)deg);">
+                            <img src="/@item.Photo.FilePath" alt="Board photo by @(item.Photo.UploadedBy?.UserName ?? "Unknown")" style="width: 100%; height: 100%; object-fit: cover; border: 2px solid var(--border-color); cursor: move;">
+                            <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 15px; height: 15px; background: var(--purple-primary); cursor: se-resize; border-radius: 2px 0 0 0;"></div>
+                            <div class="item-controls" role="toolbar" aria-label="Item controls" style="position: absolute; top: 5px; left: 5px; display: none; background: rgba(31, 22, 64, 0.9); border-radius: 4px; padding: 2px;">
+                                <button class="btn btn-sm btn-light" onclick="bringForward('@item.Id')" type="button" aria-label="Bring forward" title="Bring Forward">▲</button>
+                                <button class="btn btn-sm btn-light" onclick="sendBackward('@item.Id')" type="button" aria-label="Send backward" title="Send Backward">▼</button>
                             </div>
-                            <button class="btn-close btn-sm" onclick="deleteItem('@item.Id')" style="position: absolute; top: 5px; right: 5px;"></button>
+                            <button class="btn-close btn-sm" onclick="deleteItem('@item.Id')" type="button" aria-label="Delete photo item" style="position: absolute; top: 5px; right: 5px;"></button>
                         </div>
                     }
                     else if (!string.IsNullOrEmpty(item.TextContent))
                     {
-                        <div class="board-item" data-id="@item.Id" data-zindex="@item.ZIndex" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex;">
-                            <div contenteditable="true" class="text-item" style="width: 100%; height: 100%; padding: 8px; border: 2px solid #ddd; background: white; overflow: hidden; word-wrap: break-word; cursor: move;">@item.TextContent</div>
-                            <div class="item-controls" style="position: absolute; top: 5px; left: 5px; display: none; background: rgba(255,255,255,0.9); border-radius: 4px; padding: 2px;">
-                                <button class="btn btn-sm btn-light" onclick="bringForward('@item.Id')" title="Bring Forward">▲</button>
-                                <button class="btn btn-sm btn-light" onclick="sendBackward('@item.Id')" title="Send Backward">▼</button>
+                        <div class="board-item" data-id="@item.Id" data-zindex="@item.ZIndex" role="textbox" aria-label="Text item - draggable and editable" tabindex="0" style="position: absolute; left: @(item.PositionX)px; top: @(item.PositionY)px; width: @(item.Width)px; height: @(item.Height)px; z-index: @item.ZIndex;">
+                            <div contenteditable="true" class="text-item" role="textbox" aria-multiline="true" aria-label="Editable text content" style="width: 100%; height: 100%; padding: 8px; border: 2px solid var(--border-color); background: white; color: #000; overflow: hidden; word-wrap: break-word; cursor: move;">@item.TextContent</div>
+                            <div class="resize-handle" style="position: absolute; bottom: 0; right: 0; width: 15px; height: 15px; background: var(--purple-primary); cursor: se-resize; border-radius: 2px 0 0 0;"></div>
+                            <div class="item-controls" role="toolbar" aria-label="Item controls" style="position: absolute; top: 5px; left: 5px; display: none; background: rgba(31, 22, 64, 0.9); border-radius: 4px; padding: 2px;">
+                                <button class="btn btn-sm btn-light" onclick="bringForward('@item.Id')" type="button" aria-label="Bring forward" title="Bring Forward">▲</button>
+                                <button class="btn btn-sm btn-light" onclick="sendBackward('@item.Id')" type="button" aria-label="Send backward" title="Send Backward">▼</button>
                             </div>
-                            <button class="btn-close btn-sm" onclick="deleteItem('@item.Id')" style="position: absolute; top: 5px; right: 5px;"></button>
+                            <button class="btn-close btn-sm" onclick="deleteItem('@item.Id')" type="button" aria-label="Delete text item" style="position: absolute; top: 5px; right: 5px;"></button>
                         </div>
                     }
                 }
@@ -87,30 +89,49 @@
     }
 
     .board-item:hover {
-        outline: 2px solid #007bff;
+        outline: 2px solid var(--purple-primary);
     }
 
     .board-item:hover .item-controls {
         display: block !important;
     }
 
+    .board-item:hover .resize-handle {
+        opacity: 1;
+    }
+
     .board-item.selected {
-        outline: 3px solid #28a745;
+        outline: 3px solid var(--purple-light);
         z-index: 1000;
+    }
+
+    .resize-handle {
+        opacity: 0;
+        transition: opacity 0.2s;
     }
 
     .text-item {
         font-family: Arial, sans-serif;
         font-size: 14px;
         white-space: pre-wrap;
+        color: #000 !important;
     }
 </style>
 
 <script>
+    // Board identifier from the server model
     const boardId = '@Model.Id';
+    
+    // Currently selected board item for drag operations
     let selectedItem = null;
+    
+    // Mouse/touch offset for accurate drag positioning
     let offset = { x: 0, y: 0 };
 
+    /**
+     * Handles photo file upload to server and adds it to the current board.
+     * Displays progress indicator during upload and reloads page on success.
+     */
     // Photo upload
     document.getElementById('photoUpload').addEventListener('change', async (e) => {
         const file = e.target.files[0];
@@ -164,14 +185,118 @@
         }
     });
 
-    // Drag and drop handling
+    /**
+     * Drag and Drop System
+     * Enables moving board items (photos and text) around the canvas
+     */
     const boardItems = document.querySelectorAll('.board-item');
     boardItems.forEach(item => {
         item.addEventListener('mousedown', startDrag);
         item.addEventListener('touchstart', startDrag);
     });
 
+    /**
+     * Resize System
+     * Enables resizing board items via corner handles
+     */
+    let resizingItem = null;
+    let resizeStart = { x: 0, y: 0, width: 0, height: 0 };
+
+    document.querySelectorAll('.resize-handle').forEach(handle => {
+        handle.addEventListener('mousedown', startResize);
+        handle.addEventListener('touchstart', startResize);
+    });
+
+    /**
+     * Initiates resize operation when user clicks/touches a resize handle.
+     * @@param {Event} e - Mouse or touch event
+     */
+    function startResize(e) {
+        e.stopPropagation();
+        resizingItem = this.closest('.board-item');
+        
+        resizeStart.x = e.clientX || e.touches[0].clientX;
+        resizeStart.y = e.clientY || e.touches[0].clientY;
+        resizeStart.width = resizingItem.offsetWidth;
+        resizeStart.height = resizingItem.offsetHeight;
+
+        document.addEventListener('mousemove', resize);
+        document.addEventListener('touchmove', resize);
+        document.addEventListener('mouseup', stopResize);
+        document.addEventListener('touchend', stopResize);
+
+        e.preventDefault();
+    }
+
+    /**
+     * Updates item size during resize operation.
+     * @@param {Event} e - Mouse or touch move event
+     */
+    function resize(e) {
+        if (!resizingItem) return;
+
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+
+        const deltaX = clientX - resizeStart.x;
+        const deltaY = clientY - resizeStart.y;
+
+        const newWidth = Math.max(50, resizeStart.width + deltaX);
+        const newHeight = Math.max(50, resizeStart.height + deltaY);
+
+        resizingItem.style.width = newWidth + 'px';
+        resizingItem.style.height = newHeight + 'px';
+    }
+
+    /**
+     * Completes resize operation and saves the new size to the server.
+     */
+    async function stopResize() {
+        if (!resizingItem) return;
+
+        document.removeEventListener('mousemove', resize);
+        document.removeEventListener('touchmove', resize);
+        document.removeEventListener('mouseup', stopResize);
+        document.removeEventListener('touchend', stopResize);
+
+        const itemId = resizingItem.dataset.id;
+        const posX = parseFloat(resizingItem.style.left);
+        const posY = parseFloat(resizingItem.style.top);
+        const width = resizingItem.offsetWidth;
+        const height = resizingItem.offsetHeight;
+        const currentZIndex = parseInt(resizingItem.dataset.zindex || 0);
+
+        // Use auto-save function from site.js
+        if (typeof autoSaveItemPosition === 'function') {
+            autoSaveItemPosition(itemId, posX, posY, width, height, 0, currentZIndex);
+        } else {
+            await fetch('/api/photos/update-item', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    itemId: itemId,
+                    posX: posX,
+                    posY: posY,
+                    width: width,
+                    height: height,
+                    rotation: 0,
+                    zIndex: currentZIndex
+                })
+            });
+        }
+
+        resizingItem = null;
+    }
+
+    /**
+     * Initiates drag operation when user clicks/touches a board item.
+     * Records the item and calculates offset for smooth dragging.
+     * @@param {Event} e - Mouse or touch event
+     */
     function startDrag(e) {
+        // Don't start drag if clicking on resize handle
+        if (e.target.classList.contains('resize-handle')) return;
+        
         selectedItem = this.closest('.board-item');
         selectedItem.classList.add('selected');
 
@@ -189,6 +314,11 @@
         e.preventDefault();
     }
 
+    /**
+     * Updates item position during drag operation.
+     * Constrains movement to canvas boundaries.
+     * @@param {Event} e - Mouse or touch move event
+     */
     function drag(e) {
         if (!selectedItem) return;
 
@@ -200,6 +330,10 @@
         selectedItem.style.top = Math.max(0, y) + 'px';
     }
 
+    /**
+     * Completes drag operation and saves the new position to the server.
+     * Removes event listeners and persists item state via API call.
+     */
     async function stopDrag() {
         if (!selectedItem) return;
 
@@ -213,24 +347,42 @@
         const posY = parseFloat(selectedItem.style.top);
         const currentZIndex = parseInt(selectedItem.dataset.zindex || 0);
 
-        await fetch('/api/photos/update-item', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                itemId: itemId,
-                posX: posX,
-                posY: posY,
-                width: selectedItem.offsetWidth,
-                height: selectedItem.offsetHeight,
-                rotation: 0,
-                zIndex: currentZIndex
-            })
-        });
+        // Use auto-save function from site.js
+        if (typeof autoSaveItemPosition === 'function') {
+            autoSaveItemPosition(
+                itemId,
+                posX,
+                posY,
+                selectedItem.offsetWidth,
+                selectedItem.offsetHeight,
+                0, // rotation
+                currentZIndex
+            );
+        } else {
+            // Fallback to direct save if site.js not loaded
+            await fetch('/api/photos/update-item', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    itemId: itemId,
+                    posX: posX,
+                    posY: posY,
+                    width: selectedItem.offsetWidth,
+                    height: selectedItem.offsetHeight,
+                    rotation: 0,
+                    zIndex: currentZIndex
+                })
+            });
+        }
 
         selectedItem.classList.remove('selected');
         selectedItem = null;
     }
 
+    /**
+     * Adds a new text element to the board at a default position.
+     * Validates input and sends creation request to server.
+     */
     function addText() {
         const text = document.getElementById('textInput').value;
         if (!text.trim()) {
@@ -269,6 +421,11 @@
         });
     }
 
+    /**
+     * Deletes a board item after user confirmation.
+     * Removes the item from both UI and database.
+     * @@param {string} itemId - GUID of the board item to delete
+     */
     function deleteItem(itemId) {
         if (confirm('Delete this item?')) {
             fetch(`/api/photos/item/${itemId}`, { method: 'DELETE' })
@@ -276,7 +433,10 @@
         }
     }
 
-    // Load favorite photos
+    /**
+     * Fetches and displays user's favorite photos in the sidebar.
+     * Shows clickable thumbnails that can be added to the board.
+     */
     async function loadFavoritePhotos() {
         try {
             const response = await fetch('/api/favorites');
@@ -301,6 +461,10 @@
         }
     }
 
+    /**
+     * Adds a favorite photo to the current board at default position.
+     * @@param {string} photoId - GUID of the photo to add to board
+     */
     async function addPhotoToBoard(photoId) {
         await fetch('/api/photos/add-to-board', {
             method: 'POST',
@@ -315,6 +479,10 @@
         location.reload();
     }
 
+    /**
+     * Increases z-index to bring item forward in the layer stack.
+     * @@param {string} itemId - GUID of the board item to move forward
+     */
     function bringForward(itemId) {
         const item = document.querySelector(`[data-id="${itemId}"]`);
         if (!item) return;
@@ -328,6 +496,10 @@
         updateItemZIndex(itemId, newZ);
     }
 
+    /**
+     * Decreases z-index to send item backward in the layer stack.
+     * @@param {string} itemId - GUID of the board item to move backward
+     */
     function sendBackward(itemId) {
         const item = document.querySelector(`[data-id="${itemId}"]`);
         if (!item) return;
@@ -341,10 +513,15 @@
         updateItemZIndex(itemId, newZ);
     }
 
+    /**
+     * Persists z-index changes to the server.
+     * @@param {string} itemId - GUID of the board item
+     * @@param {number} zIndex - New z-index value for layering
+     */
     async function updateItemZIndex(itemId, zIndex) {
         const item = document.querySelector(`[data-id="${itemId}"]`);
         await fetch('/api/photos/update-item', {
-            method: 'POST',
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 itemId: itemId,
@@ -358,6 +535,6 @@
         });
     }
 
-    // Load photos on page load
+    // Initialize: Load user's favorite photos when page is ready
     loadFavoritePhotos();
 </script>

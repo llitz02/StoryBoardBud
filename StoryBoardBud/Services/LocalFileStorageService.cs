@@ -1,5 +1,8 @@
 namespace StoryBoardBud.Services;
 
+/// <summary>
+/// Handles photo file storage on local filesystem
+/// </summary>
 public class LocalFileStorageService : IFileStorageService
 {
     private readonly IWebHostEnvironment _webHostEnvironment;
@@ -8,12 +11,23 @@ public class LocalFileStorageService : IFileStorageService
     private const string UploadFolder = "uploads";
     private readonly string[] _allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 
+    /// <summary>
+    /// Initializes the file storage service with web hosting environment
+    /// </summary>
+    /// <param name="webHostEnvironment">Web hosting environment for file paths</param>
+    /// <param name="logger">Logger for recording events</param>
     public LocalFileStorageService(IWebHostEnvironment webHostEnvironment, ILogger<LocalFileStorageService> logger)
     {
         _webHostEnvironment = webHostEnvironment;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Uploads a photo to the local uploads folder
+    /// </summary>
+    /// <param name="file">Photo file to upload</param>
+    /// <param name="userId">ID of user uploading the file</param>
+    /// <returns>Relative file path of uploaded photo</returns>
     public async Task<string> UploadPhotoAsync(IFormFile file, string userId)
     {
         if (file == null || file.Length == 0)
@@ -49,6 +63,11 @@ public class LocalFileStorageService : IFileStorageService
         }
     }
 
+    /// <summary>
+    /// Deletes a photo file from local storage
+    /// </summary>
+    /// <param name="filePath">Relative path to file to delete</param>
+    /// <returns>True if file was deleted</returns>
     public async Task<bool> DeletePhotoAsync(string filePath)
     {
         try
@@ -71,6 +90,11 @@ public class LocalFileStorageService : IFileStorageService
         }
     }
 
+    /// <summary>
+    /// Converts file path to public URL
+    /// </summary>
+    /// <param name="filePath">Relative file path</param>
+    /// <returns>Public URL for the photo</returns>
     public string GetPhotoUrl(string filePath)
     {
         return $"/{filePath}";

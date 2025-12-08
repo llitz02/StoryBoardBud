@@ -11,10 +11,13 @@
     <link rel="stylesheet" href="~/StoryBoardBud.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <!-- Skip Navigation Link for Accessibility -->
+    <a href="#main-content" class="skip-to-main-content visually-hidden-focusable">Skip to main content</a>
+    
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--purple-dark) 100%);">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">StoryBoardBud</a>
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index" style="color: var(--purple-light); font-size: 1.5rem;">✨ StoryBoardBud</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -22,30 +25,30 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" style="color: var(--text-primary);">Home</a>
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Boards" asp-action="MyBoards">My Boards</a>
+                                <a class="nav-link" asp-area="" asp-controller="Boards" asp-action="MyBoards" style="color: var(--text-primary);">My Boards</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Discover" asp-action="Index">Discover</a>
+                                <a class="nav-link" asp-area="" asp-controller="Discover" asp-action="Index" style="color: var(--text-primary);">Discover</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Boards" asp-action="MyFavorites">My Favorites</a>
+                                <a class="nav-link" asp-area="" asp-controller="Boards" asp-action="MyFavorites" style="color: var(--text-primary);">My Favorites</a>
                             </li>
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index" style="color: var(--text-primary);">Admin</a>
                                 </li>
                             }
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Discover" asp-action="Index">Discover</a>
+                                <a class="nav-link" asp-area="" asp-controller="Discover" asp-action="Index" style="color: var(--text-primary);">Discover</a>
                             </li>
                         }
                     </ul>
@@ -55,14 +58,14 @@
         </nav>
     </header>
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" id="main-content" class="pb-3" tabindex="-1">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer" style="background-color: var(--bg-secondary); color: var(--text-muted);">
         <div class="container">
-            &copy; 2025 - StoryBoardBud - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - StoryBoardBud - <a asp-area="" asp-controller="Home" asp-action="Privacy" style="color: var(--purple-light);">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

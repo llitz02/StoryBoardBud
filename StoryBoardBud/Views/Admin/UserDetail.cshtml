@@ -19,12 +19,6 @@
                         <dt class="col-sm-3">Email:</dt>
                         <dd class="col-sm-9">@Model.Email</dd>
 
-                        <dt class="col-sm-3">Full Name:</dt>
-                        <dd class="col-sm-9">@(Model.FullName ?? "-")</dd>
-
-                        <dt class="col-sm-3">Bio:</dt>
-                        <dd class="col-sm-9">@(Model.BioDescription ?? "-")</dd>
-
                         <dt class="col-sm-3">Roles:</dt>
                         <dd class="col-sm-9">
                             @if (roles.Any())
@@ -68,23 +62,6 @@
                     <h6 class="mb-0">Actions</h6>
                 </div>
                 <div class="card-body">
-                    @if (Model.LockoutEnd.HasValue && Model.LockoutEnd > DateTimeOffset.UtcNow)
-                    {
-                        <form method="post" action="@Url.Action("UnlockUser")" class="mb-2">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.Id">
-                            <button type="submit" class="btn btn-sm btn-success w-100">Unlock User</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <form method="post" action="@Url.Action("LockUser")" class="mb-2">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.Id">
-                            <button type="submit" class="btn btn-sm btn-warning w-100" onclick="return confirm('Lock this user?')">Lock User</button>
-                        </form>
-                    }
-
                     <form method="post" action="@Url.Action("DeleteUser")">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.Id">

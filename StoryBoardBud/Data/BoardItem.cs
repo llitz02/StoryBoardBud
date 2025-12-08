@@ -1,12 +1,22 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace StoryBoardBud.Data;
 
+/// <summary>
+/// Represents a photo or text element on a board
+/// </summary>
 public class BoardItem
 {
     public Guid Id { get; set; }
+    
+    [Required]
     public Guid BoardId { get; set; }
     public Board Board { get; set; } = null!;
+    
     public Guid? PhotoId { get; set; }
     public Photo? Photo { get; set; }
+    
+    [StringLength(1000)]
     public string? TextContent { get; set; }
     public double PositionX { get; set; }
     public double PositionY { get; set; }

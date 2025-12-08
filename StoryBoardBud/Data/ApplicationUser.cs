@@ -1,10 +1,17 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
 namespace StoryBoardBud.Data;
 
+/// <summary>
+/// Extended user model with custom properties for StoryBoardBud application
+/// </summary>
 public class ApplicationUser : IdentityUser
 {
+    [StringLength(100)]
     public string? FullName { get; set; }
+    
+    [StringLength(500)]
     public string? BioDescription { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }

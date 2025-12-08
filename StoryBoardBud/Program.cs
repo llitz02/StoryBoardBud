@@ -3,9 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using StoryBoardBud.Data;
 using StoryBoardBud.Services;
 
+/// <summary>
+/// This is main entry point of the StoryBoardBud application, story board bud 
+/// is a web application for managing story boards and photo collections.
+/// </summary>
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// this is the service configuration section, in charge manging dependencies
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
@@ -22,7 +26,8 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// Apply migrations and seed database
+// the following section is responsible for initializing the 
+//database and seeding initial data
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -36,7 +41,6 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

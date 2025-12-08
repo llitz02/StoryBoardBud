@@ -4,15 +4,28 @@ using StoryBoardBud.Data;
 
 namespace StoryBoardBud.Controllers;
 
+/// <summary>
+/// Displays public photos for browsing and discovery
+/// </summary>
 public class DiscoverController : Controller
 {
     private readonly ApplicationDbContext _context;
 
+    /// <summary>
+    /// Initializes the DiscoverController with database access
+    /// </summary>
+    /// <param name="context">Database context for data access</param>
     public DiscoverController(ApplicationDbContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Displays paginated public photos
+    /// </summary>
+    /// <param name="page">Page number to display</param>
+    /// <param name="pageSize">Number of photos per page</param>
+    /// <returns>View with public photos</returns>
     [HttpGet]
     public async Task<IActionResult> Index(int page = 1, int pageSize = 12)
     {
@@ -35,6 +48,12 @@ public class DiscoverController : Controller
         return View(photos);
     }
 
+    /// <summary>
+    /// Gets paginated public photos as JSON
+    /// </summary>
+    /// <param name="page">Page number to retrieve</param>
+    /// <param name="pageSize">Number of photos per page</param>
+    /// <returns>JSON with photo data and pagination info</returns>
     [HttpGet("api/photos")]
     public async Task<IActionResult> GetPhotos(int page = 1, int pageSize = 12)
     {

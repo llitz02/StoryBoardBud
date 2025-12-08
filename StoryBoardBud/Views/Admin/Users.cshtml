@@ -14,7 +14,6 @@
             <tr>
                 <th>Username</th>
                 <th>Email</th>
-                <th>Full Name</th>
                 <th>Created</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -26,7 +25,6 @@
                 <tr>
                     <td>@user.UserName</td>
                     <td>@user.Email</td>
-                    <td>@(user.FullName ?? "-")</td>
                     <td>@user.CreatedAt.ToString("g")</td>
                     <td>
                         @if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow)

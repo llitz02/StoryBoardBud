@@ -33,6 +33,12 @@ public class RegisterModel : PageModel
     public class InputModel
     {
         [Required]
+        [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+        [RegularExpression(@"^[a-zA-Z0-9_]+$", ErrorMessage = "Username can only contain letters, numbers, and underscores.")]
+        [Display(Name = "Username")]
+        public string Username { get; set; } = string.Empty;
+
+        [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
@@ -62,9 +68,17 @@ public class RegisterModel : PageModel
         
         if (ModelState.IsValid)
         {
+            // Check if username is already taken
+            var existingUserByUsername = await _userManager.FindByNameAsync(Input.Username);
+            if (existingUserByUsername != null)
+            {
+                ModelState.AddModelError(string.Empty, "Username is already taken.");
+                return Page();
+            }
+
             var user = new ApplicationUser 
             { 
-                UserName = Input.Email, 
+                UserName = Input.Username, 
                 Email = Input.Email,
                 CreatedAt = DateTime.UtcNow
             };

@@ -2,19 +2,83 @@
 
 A modern web application for creating storyboards with photos, text, and drag-and-drop editing.
 
-## Features
+---
 
-- **Create & Edit Storyboards**: Build unlimited storyboards with drag-and-drop photo and text placement
-- **Photo Upload**: Upload high-quality images (up to 10MB) to your personal gallery
-- **Text Annotations**: Add text elements to storyboards for notes and ideas
-- **Community Discover Page**: Browse and use photos shared by other creators
-- **Report System**: Flag inappropriate content for admin review
-- **Admin Dashboard**: 
-  - User management (lock, unlock, delete)
-  - Report moderation and content review
-  - User activity overview
-- **Responsive UI**: Works on desktop and tablet devices
-- **User Authentication**: Secure registration and login with ASP.NET Identity
+## Project Proposal
+
+My term project will be a media site where you edit and upload photos. 
+Ideally it will be similar to Pinterest. Users can create image boards and 
+write down notes as well to compile for written thoughts to apply to the 
+board. Users will have the ability to make their images and storyboards 
+public so that others may search for or discover them by looking through 
+a discovery tab. 
+There would be many use cases for this such as art inspiration, 
+developing literature as a writer. Or even large-scale software 
+development. 
+The UI I envision will be neutral to provide the feeling of a sandbox for 
+thought and creativity to flourish. 
+
+## User Stories
+
+As a user I’d like to log in order to access the website 
+As a user I’d like to create a storyboard on the site order to work in it 
+As a user I’d like to post pictures/notes order to flesh out my ideas 
+As a userI’d like to report other users posts order to request action 
+against innapropriate posts 
+As a administrator I’d like to manage users in order to increase website stability
+As a administrator I’d like to remove inappropriate posts in order to keep 
+the sight safe for all users.
+
+## AI Disclosure
+
+Google Gemini was used in this project
+
+### How AI Was Utilized
+
+- task approach strategy assistance
+- README content and project documentation
+- Code organization improvements
+- Validation attribute additions
+- Error handling enhancements
+
+### Accessibility
+
+- **ARIA labels** on interactive elements (buttons, inputs, regions)
+- **Semantic HTML** with proper role attributes (main, navigation, progressbar)
+- **Skip navigation link** for keyboard users to bypass navigation menu
+- **Alt text** for images throughout the application
+- **Keyboard navigation** support with proper tabindex and focus management
+- **Live regions** (aria-live) for dynamic content updates and progress indicators
+- **Form labels** associated with all input fields
+- **Bootstrap accessibility features** including responsive design and focus states
+
+### Code Examples Used
+
+- Microsoft ASP.NET Core Documentation- https://learn.microsoft.com/aspnet/core/ (general framework reference and best practices)
+- Bootstrap Documentation - https://getbootstrap.com/ (for responsive UI components)
+- Query Validation - https://jqueryvalidation.org/ (client-side form validation library)
+
+- Lots of gemini guidance I couldnt source to any particular website
+
+
+### Data Model
+
+The application uses the following core entities:
+
+- **ApplicationUser**: Extended Identity user with profile information
+- **Board**: User-created storyboards
+- **Photo**: Uploaded image files with privacy settings
+- **BoardItem**: Photos or text elements positioned on boards
+- **FavoritePhoto**: User's saved favorite photos
+- **Report**: User reports for content moderation
+
+### Technologies Used
+
+- ASP.NET Core 9.0 MVC
+- Entity Framework Core with SQLite
+- ASP.NET Identity for authentication and authorization
+- Bootstrap 5 for responsive UI
+- JavaScript for interactive board editing
 
 ## Tech Stack
 
@@ -65,33 +129,6 @@ The application seeds two default accounts on first run:
 - Email: `testuser@storyboardbud.local`
 - Password: `TestPassword123!`
 
-### Creating a Storyboard
 
-1. Sign in or register
-2. Click "My Boards" → "Create New Board"
-3. Enter a title and optional description
-4. Start editing by:
-   - **Uploading photos**: Click "Upload Photo" and select an image file
-   - **Adding text**: Type in the text box and click "Add Text"
-   - **Using community photos**: Browse the "Browse Public Photos" section and click to add
-5. Drag items around the canvas to position them
-6. Delete items with the × button
-7. Changes are auto-saved
-
-### Discovering Photos
-
-1. Navigate to **Discover** in the top menu
-2. Browse public photos from other users
-3. Click on a photo to view full details
-4. Use the "Report" button if content is inappropriate
-
-### Admin Features
-
-1. Go to **Admin** in the top menu (Admin account only)
-2. **Manage Users**: View all users, lock/unlock, or delete accounts
-3. **Review Reports**: Filter by status (Pending, Approved, Rejected)
-4. **Approve/Reject**: Decide on reported content
-   - **Approve**: Hides the photo from the community
-   - **Reject**: Keeps the photo visible
 
 

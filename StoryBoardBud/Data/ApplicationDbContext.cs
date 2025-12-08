@@ -3,8 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace StoryBoardBud.Data;
 
+/// <summary>
+/// Database context for StoryBoardBud application
+/// </summary>
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
+    /// <summary>
+    /// Initializes the database context with configuration options
+    /// </summary>
+    /// <param name="options">Database configuration options</param>
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
@@ -16,6 +23,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Report> Reports { get; set; }
     public DbSet<FavoritePhoto> FavoritePhotos { get; set; }
 
+    /// <summary>
+    /// Configures entity relationships and constraints
+    /// </summary>
+    /// <param name="builder">Model builder for entity configuration</param>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

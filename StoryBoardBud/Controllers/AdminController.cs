@@ -7,6 +7,10 @@ using StoryBoardBud.Services;
 
 namespace StoryBoardBud.Controllers;
 
+/// <summary>
+/// this controller manages administrative functions such as user 
+/// management and report handling
+/// </summary>
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
@@ -16,6 +20,15 @@ public class AdminController : Controller
     private readonly IFileStorageService _fileStorageService;
     private readonly ILogger<AdminController> _logger;
 
+    /// <summary>
+    /// this constructor initializes the AdminController with necessary
+    /// dependencies for database access, user management, role management,
+    /// </summary>
+    /// <param name="context">Database context for data access</param>
+    /// <param name="userManager">User manager for authentication</param>
+    /// <param name="roleManager">the role manager for managing user roles</param>
+    /// <param name="fileStorageService">the file storage service for handling file operations</param>
+    /// <param name="logger">the logger for logging information and errors</param>
     public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager, IFileStorageService fileStorageService, ILogger<AdminController> logger)
     {
@@ -26,11 +39,21 @@ public class AdminController : Controller
         _logger = logger;
     }
 
+    /// <summary>
+    /// this method returns the main view for the admin dashboard
+    /// </summary>
+    /// <returns>the admin dashboard view</returns>
     public IActionResult Index()
     {
         return View();
     }
 
+    /// <summary>
+    /// this method returns a paginated list of users for the admin user management view
+    /// </summary>
+    /// <param name="page">the current page number</param>
+    /// <param name="pageSize">the number of users to display per page</param>
+    /// <returns>the user management view with a list of users</returns>
     [HttpGet]
     public async Task<IActionResult> Users(int page = 1, int pageSize = 10)
     {
@@ -49,6 +72,11 @@ public class AdminController : Controller
         return View(users);
     }
 
+    /// <summary>
+    /// Displays detailed information about a user
+    /// </summary>
+    /// <param name="id">User ID to view</param>
+    /// <returns>View with user details</returns>
     [HttpGet]
     public async Task<IActionResult> UserDetail(string id)
     {
@@ -67,6 +95,11 @@ public class AdminController : Controller
         return View(user);
     }
 
+    /// <summary>
+    /// Locks a user account to prevent login
+    /// </summary>
+    /// <param name="id">User ID to lock</param>
+    /// <returns>Redirect to user detail page</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LockUser(string id)
@@ -82,6 +115,11 @@ public class AdminController : Controller
         return RedirectToAction(nameof(UserDetail), new { id });
     }
 
+    /// <summary>
+    /// Unlocks a user account to allow login
+    /// </summary>
+    /// <param name="id">User ID to unlock</param>
+    /// <returns>Redirect to user detail page</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UnlockUser(string id)
@@ -97,6 +135,11 @@ public class AdminController : Controller
         return RedirectToAction(nameof(UserDetail), new { id });
     }
 
+    /// <summary>
+    /// Deletes a user and all their content
+    /// </summary>
+    /// <param name="id">User ID to delete</param>
+    /// <returns>Redirect to users list</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteUser(string id)
@@ -127,6 +170,13 @@ public class AdminController : Controller
         return RedirectToAction(nameof(Users));
     }
 
+    /// <summary>
+    /// Displays paginated reports with optional status filter
+    /// </summary>
+    /// <param name="status">Filter by report status</param>
+    /// <param name="page">Page number to display</param>
+    /// <param name="pageSize">Number of reports per page</param>
+    /// <returns>View with filtered reports</returns>
     [HttpGet]
     public async Task<IActionResult> Reports(ReportStatus? status = null, int page = 1, int pageSize = 10)
     {
@@ -158,6 +208,12 @@ public class AdminController : Controller
         return View(reports);
     }
 
+    /// <summary>
+    /// Approves a report and hides the reported photo
+    /// </summary>
+    /// <param name="id">Report ID to approve</param>
+    /// <param name="adminNotes">Optional admin notes</param>
+    /// <returns>Redirect to reports page</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ApproveReport(Guid id, string? adminNotes)
@@ -187,6 +243,12 @@ public class AdminController : Controller
         return RedirectToAction(nameof(Reports), new { status = ReportStatus.Pending });
     }
 
+    /// <summary>
+    /// Rejects a report without taking action
+    /// </summary>
+    /// <param name="id">Report ID to reject</param>
+    /// <param name="adminNotes">Optional admin notes</param>
+    /// <returns>Redirect to reports page</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RejectReport(Guid id, string? adminNotes)
@@ -207,6 +269,11 @@ public class AdminController : Controller
         return RedirectToAction(nameof(Reports), new { status = ReportStatus.Pending });
     }
 
+    /// <summary>
+    /// Deletes a photo and its file
+    /// </summary>
+    /// <param name="id">Photo ID to delete</param>
+    /// <returns>Redirect to reports page</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeletePhoto(Guid id)

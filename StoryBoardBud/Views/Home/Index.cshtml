@@ -49,24 +49,4 @@
         </div>
     </div>
 
-    @if (User.Identity?.IsAuthenticated == true)
-    {
-        <div class="mt-5">
-            <h3 class="mb-4">Quick Actions</h3>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <a href="@Url.Action("MyBoards", "Boards")" class="btn btn-outline-primary w-100 py-3">
-                        <strong>View My Boards</strong><br>
-                        <small>Access all your storyboards</small>
-                    </a>
-                </div>
-                <div class="col-md-6">
-                    <a href="@Url.Action("Index", "Discover")" class="btn btn-outline-success w-100 py-3">
-                        <strong>Explore Community</strong><br>
-                        <small>Find photos to add to your boards</small>
-                    </a>
-                </div>
-            </div>
-        </div>
-    }
 </div>
